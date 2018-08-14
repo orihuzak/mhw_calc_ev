@@ -15,81 +15,10 @@ function UlFromObjVals(props){  // 最初の文字は大文字じゃないとダ
     )
 }
 
-class WeaponStatInput extends React.Component {
-    constructor(props){
-        super(props)
-        this.handleChange = this.handleChange.bind(this)
-    }
-
-    handleChange(e){
-        this.props.onWeaponStatChange(e.target.value)
-    }
-
-    render(){
-        const attack = this.props.attack
-        const affinity = this.props.affinity
-        return (
-            <table>
-                <thead>
-                    <tr>
-                        <th>基礎攻撃力</th>
-                        <th>会心率(%)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <input name="attack" type="number" value={attack} onChange={this.handleChange} />
-                        </td>
-                        <td>
-                            <input name="affinity" type="number" value={affinity} onChange={this.handleChange} />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        )
-    }
-}
-
-class Calculator extends React.Component {
-    constructor(props){
-        super(props)
-        
-        // 武器性能を変更した場合
-        this.handleWeaponStatChange = 
-            this.handleWeaponStatChange.bind(this)
-        this.handleSkillChange = this.handleSkillChange.bind(this)
-        this.state = {
-            attack: 0,
-            affinity: 0,
-            // スキル
-            atkBoost: SKILLS.atkBoost[0],
-            agitator: SKILLS.agitator[0], 
-            latentPower: 0,
-            criticalBoost: SKILLS.criticalBoost[0],
-            maximumMight: 0,
-            weaknessExploit: 0,
-            criticalEye: 0, 
-            resentment: 0,
-            peakPerformance: 0,
-            fortify: 1,
-            heroics: 1,
-            nonElementalBoost: 1,
-            // 計算後のプロパティ
-            calcedAttack: 0,
-            calcedAffinity: 0,
-            expectedValue: 0
-        }
-    }
-
-    handleWeaponStatChange(){}
-}
-
 /** 
- * 入力フォームと入力値を受け取って保持するクラス
- * 入力値を渡す機能をもつ
+ * 期待値計算機
 */
-class EvForm extends React.Component {
+class EvCalculator extends React.Component {
     constructor(props){
         super(props)
         this.state = {
@@ -111,6 +40,8 @@ class EvForm extends React.Component {
         }
 
         this.handleChange = this.handleChange.bind(this)
+        this.handleReset = this.handleReset.bind(this)
+        this.handleClick = this.handleClick.bind(this)
     }
 
     handleChange(event) {
@@ -125,6 +56,39 @@ class EvForm extends React.Component {
         }else{
             this.setState({[name]: SKILLS[name][target.value]})
         }
+    }
+
+    /**
+     * inputがクリックされたらvalueを選択状態にする
+     * @param {*} event 
+     */
+    handleClick(event){
+        event.target.select()
+    }
+
+    /**
+     * 全inputとselectを初期値に再設定
+     * @param {*} event 
+     */
+    handleReset(event){
+        this.setState({
+            attack: 0,
+            affinity: 0,
+            // スキル
+            atkBoost: SKILLS.atkBoost[0],
+            agitator: SKILLS.agitator[0], 
+            latentPower: 0,
+            criticalBoost: SKILLS.criticalBoost[0],
+            maximumMight: 0,
+            weaknessExploit: 0,
+            criticalEye: 0, 
+            resentment: 0,
+            peakPerformance: 0,
+            fortify: 1,
+            heroics: 1,
+            nonElementalBoost: 1
+        })
+        event.preventDefault();
     }
     
     /**
@@ -159,12 +123,11 @@ class EvForm extends React.Component {
 
     render() {
         const state = this.state
-
         // 計算
         const result = this._calcExpectedValue()
 
         return (
-            <form>
+            <form onSubmit={this.handleReset}>
                 <table>
                     <thead>
                         <tr>
@@ -175,10 +138,10 @@ class EvForm extends React.Component {
                     <tbody>
                         <tr>
                             <td>
-                                <input name="attack" type="number" value={state.attack} onChange={this.handleChange} />
+                                <input name="attack" type="number" value={state.attack} onChange={this.handleChange} onClick={this.handleClick} />
                             </td>
                             <td>
-                                <input name="affinity" type="number" value={state.affinity} onChange={this.handleChange} />
+                                <input name="affinity" type="number" value={state.affinity} onChange={this.handleChange} onClick={this.handleClick} />
                             </td>
                         </tr>
                     </tbody>
@@ -354,20 +317,13 @@ class EvForm extends React.Component {
                         </tr>
                     </tbody>
                 </table>
+                <input type="submit" value="リセット" />
             </form>
         )
     }
 }
 
 ReactDOM.render(
-    // 入力フォーム
-    <EvForm />,  // 使い方
+    <EvCalculator />,
     document.getElementById('calcEv')
 )
-
-
-/* ulを出力する。あとで出力に使おう
-ReactDOM.render(
-    <UlFromObjVals obj={EvObj} />
-    ,document.getElementById('output')
-)*/
