@@ -1,3 +1,16 @@
+//////////////////////////////// Math //////////////////////////////////
+/**
+ * 第一引数を第二引数で指定した少数部の桁数までに切り捨てて返す
+ * @param (Number)x 切り捨てしたい数
+ * @param (Number)y 少数部の切り捨てたい桁数
+ * @return 指定した桁数で少数部を切り捨てたx
+ * yを指定しない場合は0で少数部を丸ごと切り捨てて整数部を返す
+ */
+function truncDecimalPlace(x, y=0){ 
+    return Math.trunc(x * (10 ** y)) / (10 ** y)
+}
+
+
 /////////////////////////////// Skills /////////////////////////////////
 const SKILL_NAME_LIST = ["atk_boost", "agitator", "latent_power","critical_boost", "maximum_might", "weakness_exploit", "critical_eye", "resentment", "peak_performance", "fortify", "heroics", "non_elemental_boost"]
 
@@ -111,21 +124,21 @@ const SKILLS = {
 
 /**
  * 会心期待値を計算する関数
- * @param affi_pct 会心率(%)
- * @param affi_ratio 会心倍率
+ * @param affiPct 会心率(%)
+ * @param affiRatio 会心倍率
  */
-function calcAffiEv(affi_pct, affi_ratio=1.25){
-    return 1 + (affi_ratio - 1) * affi_pct / 100
+function calcAffiEv(affiPct, affiRatio=1.25){
+    return 1 + (affiRatio - 1) * affiPct / 100
 }
 
 /** 武器とスキルを考慮した期待値を計算して返す
  * @param atk スキル反映後の基礎攻撃力
- * @param affi_pct 会心率
- * @param affi_ratio 会心倍率
+ * @param affiPct 会心率
+ * @param affiRatio 会心倍率
  * @return 期待値
  */
-function calcEv(atk, affi_pct, affi_ratio=1.25){
-   return atk * calcAffiEv(affi_pct, affi_ratio)
+function calcEv(atk, affiPct, affiRatio=1.25){
+   return atk * calcAffiEv(affiPct, affiRatio)
 }
 
 /*

@@ -15,6 +15,76 @@ function UlFromObjVals(props){  // 最初の文字は大文字じゃないとダ
     )
 }
 
+class WeaponStatInput extends React.Component {
+    constructor(props){
+        super(props)
+        this.handleChange = this.handleChange.bind(this)
+    }
+
+    handleChange(e){
+        this.props.onWeaponStatChange(e.target.value)
+    }
+
+    render(){
+        const attack = this.props.attack
+        const affinity = this.props.affinity
+        return (
+            <table>
+                <thead>
+                    <tr>
+                        <th>基礎攻撃力</th>
+                        <th>会心率(%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input name="attack" type="number" value={attack} onChange={this.handleChange} />
+                        </td>
+                        <td>
+                            <input name="affinity" type="number" value={affinity} onChange={this.handleChange} />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        )
+    }
+}
+
+class Calculator extends React.Component {
+    constructor(props){
+        super(props)
+        
+        // 武器性能を変更した場合
+        this.handleWeaponStatChange = 
+            this.handleWeaponStatChange.bind(this)
+        this.handleSkillChange = this.handleSkillChange.bind(this)
+        this.state = {
+            attack: 0,
+            affinity: 0,
+            // スキル
+            atkBoost: SKILLS.atkBoost[0],
+            agitator: SKILLS.agitator[0], 
+            latentPower: 0,
+            criticalBoost: SKILLS.criticalBoost[0],
+            maximumMight: 0,
+            weaknessExploit: 0,
+            criticalEye: 0, 
+            resentment: 0,
+            peakPerformance: 0,
+            fortify: 1,
+            heroics: 1,
+            nonElementalBoost: 1,
+            // 計算後のプロパティ
+            calcedAttack: 0,
+            calcedAffinity: 0,
+            expectedValue: 0
+        }
+    }
+
+    handleWeaponStatChange(){}
+}
+
 /** 
  * 入力フォームと入力値を受け取って保持するクラス
  * 入力値を渡す機能をもつ
@@ -37,33 +107,32 @@ class EvForm extends React.Component {
             peakPerformance: 0,
             fortify: 1,
             heroics: 1,
-            nonElementalBoost: 1,
+            nonElementalBoost: 1
         }
 
         this.handleChange = this.handleChange.bind(this)
-        this.handleCalc = this.handleCalc.bind(this)
     }
 
     handleChange(event) {
         const target = event.target
         // 複数の入力をとるときは以下のようにname属性を使って変数化する
         const name = target.name
-
+        
         // 武器データの場合
         if(["attack", "affinity"].indexOf(name) >= 0){
-            this.setState({
-                [name]: target.value
-            })
-        // スキルの場合
+            this.setState({[name]: target.value})
+        // スキルの場合 スキル名とレベルからスキル効果を取得してstateに格納
         }else{
-            this.setState({
-                [name]: SKILLS[name][target.value]
-            })
-        } 
+            this.setState({[name]: SKILLS[name][target.value]})
+        }
     }
     
-    handleCalc(event) {
-        let state = this.state
+    /**
+     * 期待値計算関数
+     * @return 計算結果を格納したobj attack, affinity, ev
+     */
+    _calcExpectedValue(){
+        const state = this.state
         // attackに乗算スキルの効果を掛ける
         let attack = state.attack * state.nonElementalBoost * 
                      state.heroics * state.fortify
@@ -77,150 +146,214 @@ class EvForm extends React.Component {
         
         // affinityが100を超えないように調整
         if(affinity > 100){ affinity = 100 }
+        let ev = calcEv(attack, affinity, state.criticalBoost)
         // 期待値を計算
-        let result = calcEv(attack, affinity, state.criticalBoost)
-
-        // 端数どしよ
-        console.log(this.state)
-        console.log(attack, affinity, result)
-        // 出力！
-
-        event.preventDefault();
+        let result = {
+            attack: truncDecimalPlace(attack, 3), // スキル反映後の攻撃力
+            affinity: affinity, // スキル反映後の会心率
+            // 期待値
+            ev: truncDecimalPlace(ev, 3)
+        }
+        return result
     }
 
     render() {
+        const state = this.state
+
+        // 計算
+        const result = this._calcExpectedValue()
+
         return (
-            <form onSubmit={this.handleCalc}>
-                <label>
-                    基礎攻撃力：
-                    <input name="attack" type="number" value={this.state.attack} onChange={this.handleChange} />
-                </label>
-                <label>
-                    会心率(%)：
-                    <input name="affinity" type="number" value={this.state.affinity} onChange={this.handleChange} />
-                </label>
-                <label>
-                    攻撃：
-                    <select name="atkBoost" value={this.state.value} onChange={this.handleChange}>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                    </select>
-                </label>
-                <label>
-                    挑戦者：
-                    <select name="agitator" value={this.state.value} onChange={this.handleChange}>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-                </label>
-                <label>
-                    無属性強化：
-                    <select name="nonElementalBoost" value={this.state.value} onChange={this.handleChange}>
-                        <option value="0">OFF</option>
-                        <option value="1">ON</option>
-                    </select>
-                </label>
-                <label>
-                    火事場：
-                    <select name="heroics" value={this.state.value} onChange={this.handleChange}>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-                </label>
-                <label>
-                    不屈：
-                    <select name="fortify" value={this.state.value} onChange={this.handleChange}>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                    </select>
-                </label>
-                <label>
-                    無傷：
-                    <select name="peakPerformance" value={this.state.value} onChange={this.handleChange}>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                    </select>
-                </label>
-                <label>
-                    逆上：
-                    <select name="resentment" value={this.state.value} onChange={this.handleChange}>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-                </label>
-                <label>
-                    見切り：
-                    <select name="criticalEye" value={this.state.value} onChange={this.handleChange}>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                    </select>
-                </label>
-                <label>
-                    弱点特攻：
-                    <select name="weaknessExploit" value={this.state.value} onChange={this.handleChange}>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                    </select>
-                </label>
-                <label>
-                    渾身：
-                    <select name="maximumMight" value={this.state.value} onChange={this.handleChange}>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                    </select>
-                </label>
-                <label>
-                    超会心：
-                    <select name="criticalBoost" value={this.state.value} onChange={this.handleChange}>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                    </select>
-                </label>
-                <label>
-                    力の解放：
-                    <select name="latentPower" value={this.state.value} onChange={this.handleChange}>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-                </label>
-                <input name="calc" type="submit" value="計算" />
+            <form>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>基礎攻撃力</th>
+                            <th>会心率(%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <input name="attack" type="number" value={state.attack} onChange={this.handleChange} />
+                            </td>
+                            <td>
+                                <input name="affinity" type="number" value={state.affinity} onChange={this.handleChange} />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>無属性強化</th>
+                            <th>火事場力</th>
+                            <th>不屈</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="nonElementalBoost" value={state.value} onChange={this.handleChange}>
+                                    <option value="0">OFF</option>
+                                    <option value="1">ON</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="heroics" value={state.value} onChange={this.handleChange}>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="fortify" value={state.value} onChange={this.handleChange}>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <thead>
+                        <tr>
+                            <th>攻撃</th>
+                            <th>挑戦者</th>
+                            <th>無傷</th>
+                            <th>逆上</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="atkBoost" value={state.value} onChange={this.handleChange}>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="agitator" value={state.value} onChange={this.handleChange}>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="peakPerformance" value={state.value} onChange={this.handleChange}>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="resentment" value={state.value} onChange={this.handleChange}>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <thead>
+                        <tr>
+                            <th>見切り</th>
+                            <th>弱点特攻</th>
+                            <th>渾身</th>
+                            <th>力の解放</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="criticalEye" value={state.value} onChange={this.handleChange}>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="weaknessExploit" value={state.value} onChange={this.handleChange}>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="maximumMight" value={state.value} onChange={this.handleChange}>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="latentPower" value={state.value} onChange={this.handleChange}>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <thead>
+                        <tr>
+                            <th>超会心</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="criticalBoost" value={state.value} onChange={this.handleChange}>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>反映後攻撃力</th>
+                            <th>合計会心率</th>
+                            <th>期待値</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{result.attack}</td>
+                            <td>{result.affinity}</td>
+                            <td>{result.ev}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </form>
         )
     }
@@ -228,9 +361,10 @@ class EvForm extends React.Component {
 
 ReactDOM.render(
     // 入力フォーム
-    <EvForm />  // 使い方
-    ,document.getElementById('input')
+    <EvForm />,  // 使い方
+    document.getElementById('calcEv')
 )
+
 
 /* ulを出力する。あとで出力に使おう
 ReactDOM.render(
