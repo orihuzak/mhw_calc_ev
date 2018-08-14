@@ -110,7 +110,10 @@ class EvCalculator extends React.Component {
         
         // affinityが100を超えないように調整
         if(affinity > 100){ affinity = 100 }
-        let ev = calcEv(attack, affinity, state.criticalBoost)
+        // affinityがマイナスなら会心倍率を1.25に固定
+        const affiRatio = affinity < 0 ? 1.25 : state.criticalBoost
+
+        let ev = calcEv(attack, affinity, affiRatio)
         // 期待値を計算
         let result = {
             attack: truncDecimalPlace(attack, 3), // スキル反映後の攻撃力
