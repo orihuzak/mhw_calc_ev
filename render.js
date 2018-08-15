@@ -22,21 +22,13 @@ class EvCalculator extends React.Component {
     constructor(props){
         super(props)
         this.state = {
+            // スキルレベルを持つobj
             attack: 0,
             affinity: 0,
-            // スキル
-            atkBoost: SKILLS.atkBoost[0],
-            agitator: SKILLS.agitator[0], 
-            latentPower: 0,
-            criticalBoost: SKILLS.criticalBoost[0],
-            maximumMight: 0,
-            weaknessExploit: 0,
-            criticalEye: 0, 
-            resentment: 0,
-            peakPerformance: 0,
-            fortify: 1,
-            heroics: 1,
-            nonElementalBoost: 1
+        }
+        // スキル名とレベルを初期化
+        for(let name of Object.keys(SKILLS)){
+            this.state[name] = 0
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -48,14 +40,7 @@ class EvCalculator extends React.Component {
         const target = event.target
         // 複数の入力をとるときは以下のようにname属性を使って変数化する
         const name = target.name
-        
-        // 武器データの場合
-        if(["attack", "affinity"].indexOf(name) >= 0){
-            this.setState({[name]: target.value})
-        // スキルの場合 スキル名とレベルからスキル効果を取得してstateに格納
-        }else{
-            this.setState({[name]: SKILLS[name][target.value]})
-        }
+        this.setState({[name]: target.value})
     }
 
     /**
@@ -71,23 +56,11 @@ class EvCalculator extends React.Component {
      * @param {*} event 
      */
     handleReset(event){
-        this.setState({
-            attack: 0,
-            affinity: 0,
-            // スキル
-            atkBoost: SKILLS.atkBoost[0],
-            agitator: SKILLS.agitator[0], 
-            latentPower: 0,
-            criticalBoost: SKILLS.criticalBoost[0],
-            maximumMight: 0,
-            weaknessExploit: 0,
-            criticalEye: 0, 
-            resentment: 0,
-            peakPerformance: 0,
-            fortify: 1,
-            heroics: 1,
-            nonElementalBoost: 1
-        })
+        // 全てのプロパティを0に再設定
+        for(let name of Object.keys(this.state)){
+            this.state[name] = 0
+        }
+        this.setState(this.state)   // 表示を更新
         event.preventDefault();
     }
     
@@ -98,20 +71,30 @@ class EvCalculator extends React.Component {
     _calcExpectedValue(){
         const state = this.state
         // attackに乗算スキルの効果を掛ける
-        let attack = state.attack * state.nonElementalBoost * 
-                     state.heroics * state.fortify
+        let attack = state.attack
+                    * SKILLS.nonElementalBoost[state.nonElementalBoost] 
+                    * SKILLS.heroics[state.heroics]
+                    * SKILLS.fortify[state.fortify]
         // 加算スキルと攻撃力&会心スキルの攻撃力部分を加算
-        attack += state.peakPerformance + state.resentment + 
-                  state.atkBoost.atk + state.agitator.atk
+        attack += SKILLS.peakPerformance[state.peakPerformance]
+                  + SKILLS.resentment[state.resentment]
+                  + SKILLS.atkBoost[state.atkBoost].atk
+                  + SKILLS.agitator[state.agitator].atk
         // 会心率と会心スキルを合計 (0を引いているのは文字列を数値にするため)
-        let affinity = (state.affinity - 0) + state.criticalEye + 
-                       state.weaknessExploit + state.maximumMight + 
-                       state.latentPower + state.atkBoost.affi + state.agitator.affi
+        let affinity = (state.affinity - 0) 
+                        + SKILLS.criticalEye[state.criticalEye]
+                        + SKILLS.weaknessExploit[state.weaknessExploit]
+                        + SKILLS.maximumMight[state.maximumMight]
+                        + SKILLS.latentPower[state.latentPower]
+                        + SKILLS.atkBoost[state.atkBoost].affi
+                        + SKILLS.agitator[state.agitator].affi
         
         // affinityが100を超えないように調整
         if(affinity > 100){ affinity = 100 }
         // affinityがマイナスなら会心倍率を1.25に固定
-        const affiRatio = affinity < 0 ? 1.25 : state.criticalBoost
+        const affiRatio = (affinity < 0) 
+                          ? 1.25 
+                          : SKILLS.criticalBoost[state.criticalBoost]
 
         let ev = calcEv(attack, affinity, affiRatio)
         // 期待値を計算
@@ -160,13 +143,13 @@ class EvCalculator extends React.Component {
                     <tbody>
                         <tr>
                             <td>
-                                <select name="nonElementalBoost" value={state.value} onChange={this.handleChange}>
+                                <select name="nonElementalBoost" value={state.nonElementalBoost} onChange={this.handleChange}>
                                     <option value="0">OFF</option>
                                     <option value="1">ON</option>
                                 </select>
                             </td>
                             <td>
-                                <select name="heroics" value={state.value} onChange={this.handleChange}>
+                                <select name="heroics" value={state.heroics} onChange={this.handleChange}>
                                     <option value="0">0</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -176,7 +159,7 @@ class EvCalculator extends React.Component {
                                 </select>
                             </td>
                             <td>
-                                <select name="fortify" value={state.value} onChange={this.handleChange}>
+                                <select name="fortify" value={state.fortify} onChange={this.handleChange}>
                                     <option value="0">0</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -195,7 +178,7 @@ class EvCalculator extends React.Component {
                     <tbody>
                         <tr>
                             <td>
-                                <select name="atkBoost" value={state.value} onChange={this.handleChange}>
+                                <select name="atkBoost" value={state.atkBoost} onChange={this.handleChange}>
                                     <option value="0">0</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -207,7 +190,7 @@ class EvCalculator extends React.Component {
                                 </select>
                             </td>
                             <td>
-                                <select name="agitator" value={state.value} onChange={this.handleChange}>
+                                <select name="agitator" value={state.agitator} onChange={this.handleChange}>
                                     <option value="0">0</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -217,7 +200,7 @@ class EvCalculator extends React.Component {
                                 </select>
                             </td>
                             <td>
-                                <select name="peakPerformance" value={state.value} onChange={this.handleChange}>
+                                <select name="peakPerformance" value={state.peakPerformance} onChange={this.handleChange}>
                                     <option value="0">0</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -225,7 +208,7 @@ class EvCalculator extends React.Component {
                                 </select>
                             </td>
                             <td>
-                                <select name="resentment" value={state.value} onChange={this.handleChange}>
+                                <select name="resentment" value={state.resentment} onChange={this.handleChange}>
                                     <option value="0">0</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -247,7 +230,7 @@ class EvCalculator extends React.Component {
                     <tbody>
                         <tr>
                             <td>
-                                <select name="criticalEye" value={state.value} onChange={this.handleChange}>
+                                <select name="criticalEye" value={state.criticalEye} onChange={this.handleChange}>
                                     <option value="0">0</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -259,7 +242,7 @@ class EvCalculator extends React.Component {
                                 </select>
                             </td>
                             <td>
-                                <select name="weaknessExploit" value={state.value} onChange={this.handleChange}>
+                                <select name="weaknessExploit" value={state.weaknessExploit} onChange={this.handleChange}>
                                     <option value="0">0</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -267,7 +250,7 @@ class EvCalculator extends React.Component {
                                 </select>
                             </td>
                             <td>
-                                <select name="maximumMight" value={state.value} onChange={this.handleChange}>
+                                <select name="maximumMight" value={state.maximumMight} onChange={this.handleChange}>
                                     <option value="0">0</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -275,7 +258,7 @@ class EvCalculator extends React.Component {
                                 </select>
                             </td>
                             <td>
-                                <select name="latentPower" value={state.value} onChange={this.handleChange}>
+                                <select name="latentPower" value={state.latentPower} onChange={this.handleChange}>
                                     <option value="0">0</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -294,7 +277,7 @@ class EvCalculator extends React.Component {
                     <tbody>
                         <tr>
                             <td>
-                                <select name="criticalBoost" value={state.value} onChange={this.handleChange}>
+                                <select name="criticalBoost" value={state.criticalBoost} onChange={this.handleChange}>
                                     <option value="0">0</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -328,5 +311,10 @@ class EvCalculator extends React.Component {
 
 ReactDOM.render(
     <EvCalculator />,
-    document.getElementById('calcEv')
+    document.getElementById('calcEv1')
+)
+
+ReactDOM.render(
+    <EvCalculator />,
+    document.getElementById('calcEv2')
 )
