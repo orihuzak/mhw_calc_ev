@@ -12,8 +12,6 @@ function truncDecimalPlace(x, y=0){
 
 
 /////////////////////////////// Skills /////////////////////////////////
-const SKILL_NAME_LIST = ["atk_boost", "agitator", "latent_power","critical_boost", "maximum_might", "weakness_exploit", "critical_eye", "resentment", "peak_performance", "fortify", "heroics", "non_elemental_boost"]
-
 /**
  * スキル効果をまとめたobj
  * SKLLS[skillName][skillLevel]
@@ -141,12 +139,45 @@ function calcEv(atk, affiPct, affiRatio=1.25){
    return atk * calcAffiEv(affiPct, affiRatio)
 }
 
-/*
-console.log(`基礎攻撃力:    ${EvObj.attack}`)
-console.log(`会心率:    ${EvObj.affi_pct}`)
-console.log(`会心倍率:  ${EvObj.affi_ratio}`)
-console.log(`期待値:    ${calc_ev(EvObj.attack, EvObj.affi_pct, 
-                                 EvObj.affi_ratio)}`)
-console.log(`期待値上昇率:  ${calc_ev(EvObj.attack, EvObj.affi_pct, 
-                                    EvObj.affi_ratio)
-                            / calc_ev(EvObj.attack, 0)}`)*/
+/**
+ * 期待値計算関数
+ * この関数はclassの外に出す
+ * @return 計算結果を格納したobj attack, affinity, ev
+ */
+function calcExpectedValue(status){
+    // attackに乗算スキルの効果を掛ける
+    let attack = status.attack
+                * SKILLS.nonElementalBoost[status.nonElementalBoost] 
+                * SKILLS.heroics[status.heroics]
+                * SKILLS.fortify[status.fortify]
+    // 加算スキルと攻撃力&会心スキルの攻撃力部分を加算
+    attack += SKILLS.peakPerformance[status.peakPerformance]
+                + SKILLS.resentment[status.resentment]
+                + SKILLS.atkBoost[status.atkBoost].atk
+                + SKILLS.agitator[status.agitator].atk
+    // 会心率と会心スキルを合計 (0を引いているのは文字列を数値にするため)
+    let affinity = (status.affinity - 0) 
+                    + SKILLS.criticalEye[status.criticalEye]
+                    + SKILLS.weaknessExploit[status.weaknessExploit]
+                    + SKILLS.maximumMight[status.maximumMight]
+                    + SKILLS.latentPower[status.latentPower]
+                    + SKILLS.atkBoost[status.atkBoost].affi
+                    + SKILLS.agitator[status.agitator].affi
+    
+    // affinityが100を超えないように調整
+    if(affinity > 100){ affinity = 100 }
+    // affinityがマイナスなら会心倍率を1.25に固定
+    const affiRatio = (affinity < 0) 
+                        ? 1.25 
+                        : SKILLS.criticalBoost[status.criticalBoost]
+
+    let ev = calcEv(attack, affinity, affiRatio)
+    // 期待値を計算
+    let result = {
+        attack: truncDecimalPlace(attack, 3), // スキル反映後の攻撃力
+        affinity: affinity, // スキル反映後の会心率
+        // 期待値
+        ev: truncDecimalPlace(ev, 3)
+    }
+    return result
+}
