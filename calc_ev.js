@@ -10,6 +10,18 @@ function truncDecimalPlace(x, y=0){
     return Math.trunc(x * (10 ** y)) / (10 ** y)
 }
 
+/////////////////////////////// Weapon /////////////////////////////////
+
+// 物理斬れ味補正
+const PHYSICAL_SHARPNESS = {
+    red: 0.5,
+    orange : 0.75,
+    yellow : 1.0,
+    green : 1.05,
+    blue : 1.2,
+    white : 1.32,
+}
+
 
 /////////////////////////////// Skills /////////////////////////////////
 /**
@@ -120,6 +132,8 @@ const SKILLS = {
     }
 }
 
+//////////////////////////// Calculation ///////////////////////////////
+
 /**
  * 会心期待値を計算する関数
  * @param affiPct 会心率(%)
@@ -155,6 +169,10 @@ function calcExpectedValue(status){
                 + SKILLS.resentment[status.resentment]
                 + SKILLS.atkBoost[status.atkBoost].atk
                 + SKILLS.agitator[status.agitator].atk
+    
+    // 斬れ味補正
+    attack *= PHYSICAL_SHARPNESS[status.physicalSharpness]
+
     // 会心率と会心スキルを合計 (0を引いているのは文字列を数値にするため)
     let affinity = (status.affinity - 0) 
                     + SKILLS.criticalEye[status.criticalEye]
@@ -170,8 +188,8 @@ function calcExpectedValue(status){
     const affiRatio = (affinity < 0) 
                         ? 1.25 
                         : SKILLS.criticalBoost[status.criticalBoost]
-
     let ev = calcEv(attack, affinity, affiRatio)
+
     // 期待値を計算
     let result = {
         attack: truncDecimalPlace(attack, 3), // スキル反映後の攻撃力

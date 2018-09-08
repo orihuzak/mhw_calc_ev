@@ -29,6 +29,7 @@ function initializeCalculatorStatus(){
     let status = {
         attack: 0,
         affinity: 0,
+        physicalSharpness: "green",
         resultAttack: 0,
         resultAffinity: 0,
         resultEv: 0,
@@ -38,6 +39,7 @@ function initializeCalculatorStatus(){
     for(let name of Object.keys(SKILLS)){
         status[name] = 0
     }
+
     return status
 }
 
@@ -45,12 +47,17 @@ class EvCalculator extends React.Component {
     constructor(props){
         super(props)
         this.handleChange = this.handleChange.bind(this)
+        this.selectInput = this.selectInput.bind(this)
     }
 
     handleChange(event){
         // 親のonChangeを呼んで親のstateを変更
         const target = event.target
         this.props.onChange(target.id, target.name, target.value)
+    }
+
+    selectInput(event){
+        event.target.select()
     }
 
     render() {
@@ -64,6 +71,7 @@ class EvCalculator extends React.Component {
                         <tr>
                             <th>基礎攻撃力</th>
                             <th>会心率(%)</th>
+                            <th>斬れ味</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,16 +81,33 @@ class EvCalculator extends React.Component {
                                     key={id}
                                     id={id}
                                     name="attack"
+                                    type="number"
                                     value={status.attack}
-                                    onChange={this.handleChange} onClick={this.handleClick} />
+                                    onChange={this.handleChange} onClick={this.selectInput} />
                             </td>
                             <td>
                                 <input 
                                     key={id}
                                     id={id}
                                     name="affinity"
+                                    type="number"
                                     value={status.affinity} 
-                                    onChange={this.handleChange} onClick={this.handleClick} />
+                                    onChange={this.handleChange} onClick={this.selectInput} />
+                            </td>
+                            <td>
+                                <select 
+                                    key={id}
+                                    id={id}
+                                    name="physicalSharpness"
+                                    value={status.physicalSharpness}
+                                    onChange={this.handleChange}>
+                                    <option value="red">赤</option>
+                                    <option value="orange">橙</option>
+                                    <option value="yellow">黄</option>
+                                    <option value="green">緑</option>
+                                    <option value="blue">青</option>
+                                    <option value="white">白</option>
+                                </select>
                             </td>
                         </tr>
                     </tbody>
