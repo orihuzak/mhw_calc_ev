@@ -327,7 +327,7 @@ class EvCalculator extends React.Component {
                 <table>
                     <thead>
                         <tr>
-                            <th>反映後攻撃力</th>
+                            <th>攻撃力（計算後）</th>
                             <th>合計会心率</th>
                             <th>期待値</th>
                         </tr>
@@ -383,7 +383,7 @@ class CalculatorManager extends React.Component {
     removeCalculator(event){
         // 現在のcalculatorの数が1なら削除しない
         if(Object.keys(this.state.calculators).length == 1){
-            alert("これを削除してもいいと！？")
+            alert("残り１コなんで削除できません。")
             return
         }
         const calculators = {...this.state.calculators}
@@ -406,26 +406,31 @@ class CalculatorManager extends React.Component {
         for(const [key, status] of Object.entries(calculators)){
             apps.push(
                 <li key={key}>
+                    <div className="app-header">
+                        <button
+                            id={key}
+                            className="reset"
+                            onClick={this.resetCalculator}>
+                            &#x21BB;
+                        </button>
+                        <button
+                            id={key}
+                            className="new"
+                            onClick={this.addCalculator}>
+                            ＋
+                        </button>
+                        <button 
+                            id={key}
+                            className="close"
+                            onClick={this.removeCalculator}>
+                            ×
+                        </button>
+                    </div>
                     <EvCalculator
                         key={key}
                         id={key}
                         status={status}
                         onChange={this.handleChange} />
-                    <button
-                        id={key}
-                        onClick={this.addCalculator}>
-                        +
-                    </button>
-                    <button 
-                        id={key}
-                        onClick={this.removeCalculator}>
-                        -
-                    </button>
-                    <button
-                        id={key}
-                        onClick={this.resetCalculator}>
-                        reset
-                    </button>
                 </li>
             )
         }
