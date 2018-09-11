@@ -16,6 +16,32 @@ function UlFromObjVals(props){  // 最初の文字は大文字じゃないとダ
 }
 
 
+/**
+ * １つのラジオボタンをつくる関数
+ * @param {string} id ラジオボタンのidとkeyプロパティに設定される値
+ * @param {string} name ラジオボタンのnameプロパティに設定される値
+ * @param {any} value ラジオボタンのnameプロパティに設定される値
+ * @param {Function} handler ラジオボタンのonChangeプロパティに設定される関数
+ * @param {any} checkedItem ラジオボタンのcheckedプロパティで使用される値
+ *      この値とvalueが等しい時、checkedにtrueが設定される
+ * @return {Element} ラジオボタン要素
+ */
+function RadioButton(props){
+    return ( 
+        <label>
+            <input 
+                type="radio"
+                key={props.id}
+                id={props.id}
+                name={props.name}
+                value={props.value}
+                onChange={props.onChange}
+                checked={props.checkedItem === props.value} />
+            {props.lavel}
+        </label>)
+}
+
+
 function plusFive(x){
     return (x - 0) + 5
 }
@@ -36,8 +62,8 @@ function initializeCalculatorStatus(){
     }
     
     // スキル名とレベルを初期化
-    for(let name of Object.keys(SKILLS)){
-        status[name] = 0
+    for(let skillName of Object.keys(SKILLS)){
+        status[skillName] = "0"
     }
 
     return status
@@ -63,267 +89,68 @@ class EvCalculator extends React.Component {
     render() {
         const id = this.props.id
         const status = this.props.status
+        const inputDivs = ["attack", "affinity"].map( name => {
+            return (
+                <div className="inputDiv">
+                    <label>{INPUT_VARS_JP_ENG[name]}: </label>
+                        <input 
+                            type="number"
+                            key={id}
+                            id={id}
+                            name={name}
+                            value={status[name]}
+                            onChange={this.handleChange}
+                            onClick={this.selectInput} />
+                </div>
+            )
+        })
+
+        const sharpnessRadioButtons = Object.keys(PHYSICAL_SHARPNESS).map( enColor => {
+            return (
+                <RadioButton 
+                    lavel={SHARPNESS_COLOR_JP_ENG[enColor]}
+                    id={id}
+                    name="physicalSharpness"
+                    value={enColor}
+                    onChange={this.handleChange}
+                    checkedItem={status.physicalSharpness} />
+            )
+        })
+        
+        // 各スキルのラジオボタンを生成
+        const skillLvInputDivs = []
+        for(const skillName of Object.keys(SKILLS)){
+            const radioButtons = []
+            for(const lv of Object.keys(SKILLS[skillName])){
+                radioButtons.push(
+                    <RadioButton 
+                        lavel={lv}
+                        id={id}
+                        name={skillName}
+                        value={lv}
+                        onChange={this.handleChange}
+                        checkedItem={status[skillName]} />)
+            }
+            skillLvInputDivs.push(
+                <div className="inputDiv">
+                    <label>{SKILL_NAME_ENG_JP[skillName]}: </label>
+                    <div>{radioButtons}</div>
+                </div>
+            )
+        }
 
         return (
             <form>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>基礎攻撃力</th>
-                            <th>会心率(%)</th>
-                            <th>斬れ味</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <input 
-                                    key={id}
-                                    id={id}
-                                    name="attack"
-                                    type="number"
-                                    value={status.attack}
-                                    onChange={this.handleChange} onClick={this.selectInput} />
-                            </td>
-                            <td>
-                                <input 
-                                    key={id}
-                                    id={id}
-                                    name="affinity"
-                                    type="number"
-                                    value={status.affinity} 
-                                    onChange={this.handleChange} onClick={this.selectInput} />
-                            </td>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="physicalSharpness"
-                                    value={status.physicalSharpness}
-                                    onChange={this.handleChange}>
-                                    <option value="red">赤</option>
-                                    <option value="orange">橙</option>
-                                    <option value="yellow">黄</option>
-                                    <option value="green">緑</option>
-                                    <option value="blue">青</option>
-                                    <option value="white">白</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>無属性強化</th>
-                            <th>火事場力</th>
-                            <th>不屈</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="nonElementalBoost"
-                                    value={status.nonElementalBoost} onChange={this.handleChange}>
-                                    <option value="0">OFF</option>
-                                    <option value="1">ON</option>
-                                </select>
-                            </td>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="heroics"
-                                    value={status.heroics}
-                                    onChange={this.handleChange}>
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                </select>
-                            </td>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="fortify"
-                                    value={status.fortify}
-                                    onChange={this.handleChange}>
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                    <thead>
-                        <tr>
-                            <th>攻撃</th>
-                            <th>挑戦者</th>
-                            <th>無傷</th>
-                            <th>逆上</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="atkBoost"
-                                    value={status.atkBoost}
-                                    onChange={this.handleChange}>
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                    <option value="6">6</option>
-                                    <option value="7">7</option>
-                                </select>
-                            </td>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="agitator"
-                                    value={status.agitator}
-                                    onChange={this.handleChange}>
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                </select>
-                            </td>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="peakPerformance"
-                                    value={status.peakPerformance} onChange={this.handleChange}>
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                </select>
-                            </td>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="resentment"
-                                    value={status.resentment}
-                                    onChange={this.handleChange}>
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                    <thead>
-                        <tr>
-                            <th>見切り</th>
-                            <th>弱点特攻</th>
-                            <th>渾身</th>
-                            <th>力の解放</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="criticalEye"
-                                    value={status.criticalEye}
-                                    onChange={this.handleChange}>
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                    <option value="6">6</option>
-                                    <option value="7">7</option>
-                                </select>
-                            </td>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="weaknessExploit"
-                                    value={status.weaknessExploit} onChange={this.handleChange}>
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                </select>
-                            </td>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="maximumMight"
-                                    value={status.maximumMight}
-                                    onChange={this.handleChange}>
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                </select>
-                            </td>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="latentPower"
-                                    value={status.latentPower}
-                                    onChange={this.handleChange}>
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                    <thead>
-                        <tr>
-                            <th>超会心</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <select 
-                                    key={id}
-                                    id={id}
-                                    name="criticalBoost"
-                                    value={status.criticalBoost}
-                                    onChange={this.handleChange}>
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div className="weaponStatus">
+                    {inputDivs}
+                    <div className="inputDiv">
+                        <label>斬れ味: </label>
+                        <div>{sharpnessRadioButtons}</div>
+                    </div>
+                </div>
+                <div className="skills">
+                    {skillLvInputDivs}
+                </div>
                 <table>
                     <thead>
                         <tr>

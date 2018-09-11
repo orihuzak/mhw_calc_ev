@@ -12,6 +12,22 @@ function truncDecimalPlace(x, y=0){
 
 /////////////////////////////// Weapon /////////////////////////////////
 
+const INPUT_VARS_JP_ENG = {
+    attack: "基礎攻撃力",
+    affinity: "会心率（％）",
+    sharpness: "斬れ味",
+}
+
+const SHARPNESS_COLOR_JP_ENG = {
+    red: "赤",
+    orange : "橙",
+    yellow : "黄",
+    green : "緑",
+    blue : "青",
+    white : "白",
+}
+
+
 // 物理斬れ味補正
 const PHYSICAL_SHARPNESS = {
     red: 0.5,
@@ -24,12 +40,62 @@ const PHYSICAL_SHARPNESS = {
 
 
 /////////////////////////////// Skills /////////////////////////////////
+
+const SKILL_NAME_ENG_JP = {
+    nonElementalBoost: "無属性強化",
+    heroics: "火事場力",
+    fortify: "不屈",
+    peakPerformance: "無傷",
+    resentment: "逆上",
+    atkBoost: "攻撃力UP",
+    agitator: "挑戦者",
+    criticalEye: "見切り",
+    weaknessExploit: "弱点特攻",
+    maximumMight: "渾身",
+    latentPower: "力の解放",
+    criticalBoost: "超会心",
+}
+
+
 /**
  * スキル効果をまとめたobj
  * SKLLS[skillName][skillLevel]
  * という感じで呼び出す
  */
 const SKILLS = {
+    ////////////// 乗算スキル ////////////////
+    nonElementalBoost: {
+        0: 1,
+        1: 1.1
+    },
+    heroics: {
+        0: 1,
+        1: 1.05,
+        2: 1.1, 
+        3: 1.15,
+        4: 1.2,
+        5: 1.3
+    },
+    fortify: {
+        0: 1,
+        1: 1.1,
+        2: 1.2,
+    },
+    ////////////// 加算スキル ////////////////
+    peakPerformance: {
+        0: 0,
+        1: 5,
+        2: 10,
+        3: 20
+    },
+    resentment: {
+        0: 0,
+        1: 5,
+        2: 10,
+        3: 15,
+        4: 20,
+        5: 25
+    },
     //////////////////// 攻撃&会心スキル /////////////////////
     atkBoost: {
         0: {atk: 0, affi: 0},
@@ -49,46 +115,7 @@ const SKILLS = {
         4: {atk: 16, affi: 12},
         5: {atk: 20, affi: 15},
     },
-    ////////////// 乗算スキル ////////////////
-    /** 無属性強化 */
-    nonElementalBoost: {
-        0: 1,
-        1: 1.1
-    },
-    /** 火事場スキル */
-    heroics: {
-        0: 1,
-        1: 1.05,
-        2: 1.1, 
-        3: 1.15,
-        4: 1.2,
-        5: 1.3
-    },
-    /** 不屈 */
-    fortify: {
-        0: 1,
-        1: 1.1,
-        2: 1.2,
-    },
-    ////////////// 加算スキル ////////////////
-    /** 無傷 */
-    peakPerformance: {
-        0: 0,
-        1: 5,
-        2: 10,
-        3: 20
-    },
-    /** 逆上 */
-    resentment: {
-        0: 0,
-        1: 5,
-        2: 10,
-        3: 15,
-        4: 20,
-        5: 25
-    },
     ////////////////////// 会心スキル ////////////////////////
-    /** 見切り */
     criticalEye: {
         0: 0,
         1: 3,
@@ -99,21 +126,18 @@ const SKILLS = {
         6: 25,
         7: 30
     },
-    /** 弱点特攻 */
     weaknessExploit: {
         0: 0,
         1: 15,
         2: 30,
         3: 50
     },
-    /** 渾身 */
     maximumMight: {
         0: 0,
         1: 10,
         2: 20,
         3: 30
     },
-    /** 力の解放 */
     latentPower: {
         0: 0,
         1: 10,
@@ -123,7 +147,6 @@ const SKILLS = {
         5: 50
     },
     //////////////////// 会心倍率スキル //////////////////////
-    /** 超会心 */
     criticalBoost: {
         0: 1.25,
         1: 1.3,

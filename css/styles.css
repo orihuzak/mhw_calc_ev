@@ -2,6 +2,7 @@ body{
     margin: 0;
     padding: 10px 10px 10px 10px;
     background-color: lightgray;
+    font-size: 0.8em;
 }
 
 h1, h2, h3, h4, h5{
@@ -10,26 +11,17 @@ h1, h2, h3, h4, h5{
 
 table{
     margin: 5px 0 5px 0;
-    /*
     border: solid 1px black;
     border-collapse: collapse;
-    */
 }
 
 th, td{
     margin: 5px 0 5px 0;
-    /*
     border: solid 1px black;
     border-collapse: collapse;
-    */
-}
-
-th {
-    font-size: 0.7em
 }
 
 input{
-    width: 100px;
     box-sizing: border-box;
 }
 
@@ -80,6 +72,27 @@ li{
 
 form{
     padding: 5px 5px 5px 5px;
+}
+
+form label{
+    font-weight: bold;
+}
+
+.weaponStatus{
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+.skills{
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+.inputDiv{
+    display: flex;
+    justify-content: space-between;
 }
 
 #container table{
