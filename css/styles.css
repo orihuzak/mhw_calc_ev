@@ -41,12 +41,13 @@ ul {
     margin: 0;
     padding: 0;
     list-style: none;
+    display: flex;
     flex-wrap: wrap;
 }
 
 li{
     width: 300px;
-    margin: 0 10px 10px 0;
+    margin: 0 auto 10px auto;
     background-color: white;
     box-shadow: 0 2px darkgray;
     border-radius: 3px;
@@ -85,16 +86,16 @@ form{
     width: 100%;
 }
 
-#comment {
+#footer {
     border-top: 2px dotted gray;
 }
 
-#comment table{
+#footer table{
     border: solid 1px black;
     border-collapse: collapse;
 }
 
-#comment th, #comment td{
+#footer th, #footer td{
     border: solid 1px black;
 }
 
