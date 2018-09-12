@@ -1,18 +1,49 @@
 ////////////////////////////// 出力・描画 ///////////////////////////////
 
 /**
- * Objectのvalからul要素をつくる関数
- * @param {*} props 
+ * ラジオボタンクラス
  */
-function UlFromObjVals(props){  // 最初の文字は大文字じゃないとダメ
-    const obj = props.obj
-    // objectのitemを１つずつli化して、liのリストをつくる
-    const listItems = Object.entries(obj).map((item) =>
-        <li key={item[0].toString()}>{item[1]}</li>
-    )
-    return (
-        <ul>{listItems}</ul>
-    )
+class MyRadioButton extends React.Component{
+    constructor(props){
+        super(props)
+        this.normalStyle = {
+            backgroundColor: "#ccc",
+            color: "black",
+        }
+        this.checkedStyle = {
+            backgroundColor: "white",
+            color: "orange",
+        }
+        this.state = {
+            switch: false,
+            style: this.normalStyle,
+            value: this.props.value
+        }
+        
+        this.handleClick = this.handleClick.bind(this)
+    }
+
+    handleClick(event){
+        console.log("押された")
+        this.setState(state => ({
+            switch: !state.switch,
+            style: (state.switch) ? this.normalStyle : this.checkedStyle
+        }))
+        this.props.onChange(event)
+    }
+
+    render(){
+        const state = this.state
+        return(
+            <button
+                className="myRadioButton"
+                style={this.state.style}
+                key={this.props.id}
+                id={this.props.id}
+                onClick={this.handleClick}>{this.props.label}</button>
+        )
+        
+    }
 }
 
 
@@ -22,23 +53,25 @@ function UlFromObjVals(props){  // 最初の文字は大文字じゃないとダ
  * @param {string} name ラジオボタンのnameプロパティに設定される値
  * @param {any} value ラジオボタンのnameプロパティに設定される値
  * @param {Function} handler ラジオボタンのonChangeプロパティに設定される関数
- * @param {any} checkedItem ラジオボタンのcheckedプロパティで使用される値
+ * @param {any} checkItem ラジオボタンのcheckedプロパティで使用される値
  *      この値とvalueが等しい時、checkedにtrueが設定される
  * @return {Element} ラジオボタン要素
  */
 function RadioButton(props){
-    return ( 
-        <label>
+    return (
+        <div key={props.id} id={props.id} className="radioButtonBox">
             <input 
                 type="radio"
-                key={props.id}
-                id={props.id}
+                className="radioButton"
+                id={props.value}
                 name={props.name}
                 value={props.value}
                 onChange={props.onChange}
-                checked={props.checkedItem === props.value} />
-            {props.lavel}
-        </label>)
+                checked={props.checkItem === props.value} />
+            <label  className="radioButtonLabel" htmlFor={props.value}>
+                {props.lavel}
+            </label>
+        </div>)
 }
 
 
@@ -77,9 +110,11 @@ class EvCalculator extends React.Component {
     }
 
     handleChange(event){
-        // 親のonChangeを呼んで親のstateを変更
+        // 親のonChangeを呼んで親のstateを更新
         const target = event.target
-        this.props.onChange(target.id, target.name, target.value)
+        // li.calculatorのidを取得
+        const id = $(target).parents(".calculator").attr("id")
+        this.props.onChange(id, target.name, target.value)
     }
 
     selectInput(event){
@@ -87,16 +122,14 @@ class EvCalculator extends React.Component {
     }
 
     render() {
-        const id = this.props.id
         const status = this.props.status
         const inputDivs = ["attack", "affinity"].map( name => {
             return (
-                <div className="inputDiv">
+                <div className="inputDiv" key={name} id={name}>
                     <label>{INPUT_VARS_JP_ENG[name]}: </label>
                         <input 
                             type="number"
-                            key={id}
-                            id={id}
+                            className="weaponInput"
                             name={name}
                             value={status[name]}
                             onChange={this.handleChange}
@@ -105,39 +138,53 @@ class EvCalculator extends React.Component {
             )
         })
 
-        const sharpnessRadioButtons = Object.keys(PHYSICAL_SHARPNESS).map( enColor => {
+        const sharpnessRadioButtons = Object.keys(PHYSICAL_SHARPNESS).map( (enColor) => {
             return (
+                /*
+                <MyRadioButton
+                    label={SHARPNESS_COLOR_JP_ENG[enColor]}
+                    key={enColor}
+                    id={enColor}
+                    name="physicalSharpness"
+                    value={enColor}
+                    onClick={this.handleChange} />*/
+                
                 <RadioButton 
                     lavel={SHARPNESS_COLOR_JP_ENG[enColor]}
-                    id={id}
+                    key={enColor}
+                    id={enColor}
                     name="physicalSharpness"
                     value={enColor}
                     onChange={this.handleChange}
-                    checkedItem={status.physicalSharpness} />
+                    checkItem={status.physicalSharpness} />
+                
             )
         })
         
         // 各スキルのラジオボタンを生成
-        const skillLvInputDivs = []
-        for(const skillName of Object.keys(SKILLS)){
-            const radioButtons = []
-            for(const lv of Object.keys(SKILLS[skillName])){
-                radioButtons.push(
+        const skillLvInputDivs = Object.keys(SKILLS).map( skillName => {
+            const radioButtons = Object.keys(SKILLS[skillName]).map( lv => {
+                return (
                     <RadioButton 
                         lavel={lv}
-                        id={id}
+                        key={lv}
+                        id={lv}
                         name={skillName}
                         value={lv}
                         onChange={this.handleChange}
-                        checkedItem={status[skillName]} />)
-            }
-            skillLvInputDivs.push(
-                <div className="inputDiv">
+                        checkItem={status[skillName]} />
+                )
+            })
+            return (
+                
+                <div className="inputDiv" key={skillName} id={skillName}>
                     <label>{SKILL_NAME_ENG_JP[skillName]}: </label>
                     <div>{radioButtons}</div>
                 </div>
             )
-        }
+        })
+
+        
 
         return (
             <form>
@@ -148,7 +195,7 @@ class EvCalculator extends React.Component {
                         <div>{sharpnessRadioButtons}</div>
                     </div>
                 </div>
-                <div className="skills">
+                <div className="skillSection">
                     {skillLvInputDivs}
                 </div>
                 <table>
@@ -232,7 +279,7 @@ class CalculatorManager extends React.Component {
         const calculators = this.state.calculators
         for(const [key, status] of Object.entries(calculators)){
             apps.push(
-                <li key={key}>
+                <li key={key} id={key} className="calculator">
                     <div className="app-header">
                         <button
                             id={key}

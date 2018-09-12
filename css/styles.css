@@ -2,7 +2,7 @@ body{
     margin: 0;
     padding: 10px 10px 10px 10px;
     background-color: lightgray;
-    font-size: 0.8em;
+    font-size: 0.9em;
 }
 
 h1, h2, h3, h4, h5{
@@ -19,10 +19,6 @@ th, td{
     margin: 5px 0 5px 0;
     border: solid 1px black;
     border-collapse: collapse;
-}
-
-input{
-    box-sizing: border-box;
 }
 
 select{
@@ -60,6 +56,7 @@ li{
     font-size: 0.8em;
     font-weight: bold;
     border-radius: 5px;
+    background-color: white;
 }
 
 .new{
@@ -71,11 +68,12 @@ li{
 }
 
 form{
-    padding: 5px 5px 5px 5px;
+    padding: 10px 10px 10px 10px;
 }
 
 form label{
     font-weight: bold;
+    font-size: 0.9em;
 }
 
 .weaponStatus{
@@ -83,6 +81,13 @@ form label{
     margin-bottom: 5px;
     border-bottom: 1px solid #ccc;
 }
+
+.weaponInput{
+    text-align: right;
+    font-size: 1em;
+}
+
+
 
 .skills{
     padding-bottom: 5px;
@@ -114,4 +119,16 @@ form label{
 
 p{
     margin: 0;
+}
+
+.myRadioButton{
+    width: 30px;
+    height: 30px;
+    border-radius: 0%;
+    border: 1px solid #ccc;
+}
+
+/* ラジオボタン関数のスタイル */
+.radioButtonBox{
+    display: inline;
 }
