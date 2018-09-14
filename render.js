@@ -148,7 +148,7 @@ class EvCalculator extends React.Component {
                                         sizes={sizes}
                                         onClick={this.handleButtonClick} />
 
-        const skillButtonArea = Object.keys(SKILLS).map( skillName => {
+        const skillButtonRows = Object.keys(SKILLS).map( skillName => {
             const sizes = Object.keys(SKILLS[skillName]).map( lv => {
                 return (
                         {
@@ -160,15 +160,15 @@ class EvCalculator extends React.Component {
                     )
             })
             return (
-                <ButtonManager key={skillName} id={skillName} sizes={sizes} onClick={this.handleButtonClick} />
-            )
-        })
-
-        const skillLabels = Object.keys(SKILLS).map( skillName => {
-            return (
-                <label key={skillName} id={skillName} className="skill-label">
-                    {SKILL_NAME_ENG_JP[skillName]}
-                </label>
+                <div className="skill-row" key={skillName} id={skillName}>
+                    <label className="skill-label">
+                        {SKILL_NAME_ENG_JP[skillName]}
+                    </label>
+                    <ButtonManager
+                        sizes={sizes}
+                        onClick={this.handleButtonClick}
+                    />
+                </div>
             )
         })
 
@@ -182,13 +182,7 @@ class EvCalculator extends React.Component {
                     </div>
                 </section>
                 <section className="skill-section">
-                    <div className="skill-label-area">
-                        {skillLabels}
-                    </div>
-                    <div className="skill-button-area">
-                        {skillButtonArea} 
-                    </div>
-                    
+                    {skillButtonRows}
                 </section>
                 <section className="result">
                     <table>

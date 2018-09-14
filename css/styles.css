@@ -87,32 +87,29 @@ form label{
     font-size: 1em;
 }
 
-
 .skill-section{
     padding-bottom: 5px;
     margin-bottom: 5px;
     border-bottom: 1px solid #ccc;
-    display: flex;
 }
 
-.skill-label-area{
-    width: 30%;
+.skill-row{
+    display: flex;
+    margin-bottom: 3px;
 }
 
 /* heightは.my-radio-buttonと等しくする */
 .skill-label{
-    display: block;
-    height: 25px;
+    width: 25%;
     display: flex;
     align-items: center;
     border-bottom: 1px dotted #ccc;
-    margin-bottom: 2px;
 }
 
 .input-row{
     display: flex;
     justify-content: space-between;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
 }
 
 #container table{
@@ -143,9 +140,9 @@ p{
     height: 25px;
     border-radius: 10%;
     border: 1px solid #ccc;
-    margin-right: 1px;
+    margin-right: 2px;
 }
 
-.radio-buttons-row{
-    margin-bottom: 3px;
+.my-radio-button:hover{
+    opacity: .8;
 }
