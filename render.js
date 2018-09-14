@@ -147,8 +147,8 @@ class EvCalculator extends React.Component {
         const sharpnessRadioButtons = <ButtonManager 
                                         sizes={sizes}
                                         onClick={this.handleButtonClick} />
-        
-        const skillSection = Object.keys(SKILLS).map( skillName => {
+
+        const skillButtonArea = Object.keys(SKILLS).map( skillName => {
             const sizes = Object.keys(SKILLS[skillName]).map( lv => {
                 return (
                         {
@@ -160,10 +160,15 @@ class EvCalculator extends React.Component {
                     )
             })
             return (
-                <div className="input-row" key={skillName} id={skillName}>
-                    <label>{SKILL_NAME_ENG_JP[skillName]}: </label>
-                    <ButtonManager sizes={sizes} onClick={this.handleButtonClick} />
-                </div>
+                <ButtonManager key={skillName} id={skillName} sizes={sizes} onClick={this.handleButtonClick} />
+            )
+        })
+
+        const skillLabels = Object.keys(SKILLS).map( skillName => {
+            return (
+                <label key={skillName} id={skillName} className="skill-label">
+                    {SKILL_NAME_ENG_JP[skillName]}
+                </label>
             )
         })
 
@@ -177,7 +182,13 @@ class EvCalculator extends React.Component {
                     </div>
                 </section>
                 <section className="skill-section">
-                    {skillSection}
+                    <div className="skill-label-area">
+                        {skillLabels}
+                    </div>
+                    <div className="skill-button-area">
+                        {skillButtonArea} 
+                    </div>
+                    
                 </section>
                 <section className="result">
                     <table>

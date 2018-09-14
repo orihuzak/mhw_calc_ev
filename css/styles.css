@@ -34,7 +34,7 @@ ul {
 }
 
 li{
-    width: 300px;
+    width: 320px;
     margin: 0 auto 10px auto;
     background-color: white;
     box-shadow: 0 2px darkgray;
@@ -92,6 +92,21 @@ form label{
     padding-bottom: 5px;
     margin-bottom: 5px;
     border-bottom: 1px solid #ccc;
+    display: flex;
+}
+
+.skill-label-area{
+    width: 30%;
+}
+
+/* heightは.my-radio-buttonと等しくする */
+.skill-label{
+    display: block;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px dotted #ccc;
+    margin-bottom: 2px;
 }
 
 .input-row{
@@ -124,9 +139,13 @@ p{
 
 /* ラジオボタンのスタイル */
 .my-radio-button{
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
     border-radius: 10%;
     border: 1px solid #ccc;
     margin-right: 1px;
+}
+
+.radio-buttons-row{
+    margin-bottom: 3px;
 }
