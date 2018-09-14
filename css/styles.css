@@ -59,11 +59,11 @@ li{
     background-color: white;
 }
 
-.new{
+.new-button{
     width: 30%;
 }
 
-.close{
+.close-button{
     color: red;
 }
 
@@ -76,28 +76,28 @@ form label{
     font-size: 0.9em;
 }
 
-.weaponStatus{
+.weapon-status{
     padding-bottom: 5px;
     margin-bottom: 5px;
     border-bottom: 1px solid #ccc;
 }
 
-.weaponInput{
+.weapon-input{
     text-align: right;
     font-size: 1em;
 }
 
 
-
-.skills{
+.skill-section{
     padding-bottom: 5px;
     margin-bottom: 5px;
     border-bottom: 1px solid #ccc;
 }
 
-.inputDiv{
+.input-row{
     display: flex;
     justify-content: space-between;
+    margin-bottom: 3px;
 }
 
 #container table{
@@ -121,14 +121,12 @@ p{
     margin: 0;
 }
 
-.myRadioButton{
+
+/* ラジオボタンのスタイル */
+.my-radio-button{
     width: 30px;
     height: 30px;
-    border-radius: 0%;
+    border-radius: 10%;
     border: 1px solid #ccc;
-}
-
-/* ラジオボタン関数のスタイル */
-.radioButtonBox{
-    display: inline;
+    margin-right: 1px;
 }

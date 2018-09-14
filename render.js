@@ -1,82 +1,68 @@
 ////////////////////////////// 出力・描画 ///////////////////////////////
-
-/**
- * ラジオボタンクラス
- */
-class MyRadioButton extends React.Component{
+class ButtonManager extends React.Component {
     constructor(props){
         super(props)
-        this.normalStyle = {
-            backgroundColor: "#ccc",
-            color: "black",
-        }
-        this.checkedStyle = {
-            backgroundColor: "white",
-            color: "orange",
-        }
         this.state = {
-            switch: false,
-            style: this.normalStyle,
-            value: this.props.value
+            selectedButtonId: null
         }
-        
-        this.handleClick = this.handleClick.bind(this)
+        this.handleButtonClick = this.handleButtonClick.bind(this)
     }
 
-    handleClick(event){
-        console.log("押された")
-        this.setState(state => ({
-            switch: !state.switch,
-            style: (state.switch) ? this.normalStyle : this.checkedStyle
-        }))
-        this.props.onChange(event)
+    handleButtonClick(event){
+        const target = event.target
+        this.setState({
+            selectedButtonId: target.id,
+        })
+        this.props.onClick(event)
     }
 
-    render(){
-        const state = this.state
-        return(
-            <button
-                className="myRadioButton"
-                style={this.state.style}
-                key={this.props.id}
-                id={this.props.id}
-                onClick={this.handleClick}>{this.props.label}</button>
+    render() {
+        // propsからarrayを受け取る
+        const sizes = this.props.sizes
+        const buttons = sizes.map( size => {
+            return (
+                <RadioButton
+                    key={size.id}
+                    id={size.id}
+                    label={size.label}
+                    groupName={size.groupName}
+                    value={size.value}
+                    isSelected={this.state.selectedButtonId === size.id}
+                    onClick={this.handleButtonClick} />
+            )
+        })
+
+        return (
+            <div className="radio-buttons-row">
+                {buttons}
+            </div>
         )
-        
     }
 }
 
-
-/**
- * １つのラジオボタンをつくる関数
- * @param {string} id ラジオボタンのidとkeyプロパティに設定される値
- * @param {string} name ラジオボタンのnameプロパティに設定される値
- * @param {any} value ラジオボタンのnameプロパティに設定される値
- * @param {Function} handler ラジオボタンのonChangeプロパティに設定される関数
- * @param {any} checkItem ラジオボタンのcheckedプロパティで使用される値
- *      この値とvalueが等しい時、checkedにtrueが設定される
- * @return {Element} ラジオボタン要素
- */
-function RadioButton(props){
+const RadioButton = ({id, label, groupName, value, isSelected, onClick}) => {
+    const selectedStyle = {
+        backgroundColor: "white",
+        color: "orange",
+    }
+    const normalStyle = {
+        backgroundColor: "#ccc",
+        color: "black",
+    }
+    
     return (
-        <div key={props.id} id={props.id} className="radioButtonBox">
-            <input 
-                type="radio"
-                className="radioButton"
-                id={props.value}
-                name={props.name}
-                value={props.value}
-                onChange={props.onChange}
-                checked={props.checkItem === props.value} />
-            <label  className="radioButtonLabel" htmlFor={props.value}>
-                {props.lavel}
-            </label>
-        </div>)
-}
-
-
-function plusFive(x){
-    return (x - 0) + 5
+        <button
+            type="button"
+            className="my-radio-button"
+            id={id}
+            name={groupName}
+            value={value}
+            onClick={onClick}
+            style={isSelected ? selectedStyle : normalStyle}
+        >
+            {label}
+        </button>
+    )
 }
 
 /**
@@ -107,6 +93,7 @@ class EvCalculator extends React.Component {
         super(props)
         this.handleChange = this.handleChange.bind(this)
         this.selectInput = this.selectInput.bind(this)
+        this.handleButtonClick = this.handleButtonClick.bind(this)
     }
 
     handleChange(event){
@@ -117,19 +104,25 @@ class EvCalculator extends React.Component {
         this.props.onChange(id, target.name, target.value)
     }
 
+    handleButtonClick(event){
+        const target = event.target
+        const id = $(target).parents(".calculator").attr("id")
+        this.props.onClick(id, target.name, target.value)
+    }
+
     selectInput(event){
         event.target.select()
     }
 
     render() {
         const status = this.props.status
-        const inputDivs = ["attack", "affinity"].map( name => {
+        const weaponInput = ["attack", "affinity"].map( name => {
             return (
-                <div className="inputDiv" key={name} id={name}>
+                <div className="input-row" key={name} id={name}>
                     <label>{INPUT_VARS_JP_ENG[name]}: </label>
                         <input 
                             type="number"
-                            className="weaponInput"
+                            className="weapon-input"
                             name={name}
                             value={status[name]}
                             onChange={this.handleChange}
@@ -138,82 +131,72 @@ class EvCalculator extends React.Component {
             )
         })
 
-        const sharpnessRadioButtons = Object.keys(PHYSICAL_SHARPNESS).map( (enColor) => {
-            return (
-                /*
-                <MyRadioButton
-                    label={SHARPNESS_COLOR_JP_ENG[enColor]}
-                    key={enColor}
-                    id={enColor}
-                    name="physicalSharpness"
-                    value={enColor}
-                    onClick={this.handleChange} />*/
-                
-                <RadioButton 
-                    lavel={SHARPNESS_COLOR_JP_ENG[enColor]}
-                    key={enColor}
-                    id={enColor}
-                    name="physicalSharpness"
-                    value={enColor}
-                    onChange={this.handleChange}
-                    checkItem={status.physicalSharpness} />
-                
-            )
-        })
-        
-        // 各スキルのラジオボタンを生成
-        const skillLvInputDivs = Object.keys(SKILLS).map( skillName => {
-            const radioButtons = Object.keys(SKILLS[skillName]).map( lv => {
-                return (
-                    <RadioButton 
-                        lavel={lv}
-                        key={lv}
-                        id={lv}
-                        name={skillName}
-                        value={lv}
-                        onChange={this.handleChange}
-                        checkItem={status[skillName]} />
-                )
-            })
-            return (
-                
-                <div className="inputDiv" key={skillName} id={skillName}>
-                    <label>{SKILL_NAME_ENG_JP[skillName]}: </label>
-                    <div>{radioButtons}</div>
-                </div>
+        // 斬れ味用のラジオボタン
+        // ラジオボタンに必要な情報を持つobjの配列をつくる
+        const sizes = Object.keys(PHYSICAL_SHARPNESS).map( engColor => {
+            return(
+                {
+                    id: engColor,
+                    label: SHARPNESS_COLOR_JP_ENG[engColor],
+                    groupName: "physicalSharpness",
+                    value: engColor,
+                }
             )
         })
 
+        const sharpnessRadioButtons = <ButtonManager 
+                                        sizes={sizes}
+                                        onClick={this.handleButtonClick} />
         
+        const skillSection = Object.keys(SKILLS).map( skillName => {
+            const sizes = Object.keys(SKILLS[skillName]).map( lv => {
+                return (
+                        {
+                            id: lv,
+                            label: lv,
+                            groupName: skillName,
+                            value: lv
+                        }
+                    )
+            })
+            return (
+                <div className="input-row" key={skillName} id={skillName}>
+                    <label>{SKILL_NAME_ENG_JP[skillName]}: </label>
+                    <ButtonManager sizes={sizes} onClick={this.handleButtonClick} />
+                </div>
+            )
+        })
 
         return (
             <form>
-                <div className="weaponStatus">
-                    {inputDivs}
-                    <div className="inputDiv">
+                <section className="weapon-status">
+                    {weaponInput}
+                    <div className="input-row">
                         <label>斬れ味: </label>
-                        <div>{sharpnessRadioButtons}</div>
+                        {sharpnessRadioButtons}
                     </div>
-                </div>
-                <div className="skillSection">
-                    {skillLvInputDivs}
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>攻撃力（計算後）</th>
-                            <th>合計会心率</th>
-                            <th>期待値</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>{status.resultAttack}</td>
-                            <td>{status.resultAffinity}</td>
-                            <td>{status.resultEv}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                </section>
+                <section className="skill-section">
+                    {skillSection}
+                </section>
+                <section className="result">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>攻撃力（計算後）</th>
+                                <th>合計会心率</th>
+                                <th>期待値</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{status.resultAttack}</td>
+                                <td>{status.resultAffinity}</td>
+                                <td>{status.resultEv}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
             </form>
         )
     }
@@ -282,20 +265,23 @@ class CalculatorManager extends React.Component {
                 <li key={key} id={key} className="calculator">
                     <div className="app-header">
                         <button
+                            type="button"
                             id={key}
-                            className="reset"
+                            className="reset-button"
                             onClick={this.resetCalculator}>
                             &#x21BB;
                         </button>
                         <button
+                            type="button"
                             id={key}
-                            className="new"
+                            className="new-button"
                             onClick={this.addCalculator}>
                             ＋
                         </button>
                         <button 
+                            type="button"
                             id={key}
-                            className="close"
+                            className="close-button"
                             onClick={this.removeCalculator}>
                             ×
                         </button>
@@ -304,7 +290,8 @@ class CalculatorManager extends React.Component {
                         key={key}
                         id={key}
                         status={status}
-                        onChange={this.handleChange} />
+                        onChange={this.handleChange}
+                        onClick={this.handleChange}/>
                 </li>
             )
         }
