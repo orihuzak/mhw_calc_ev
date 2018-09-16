@@ -1,7 +1,8 @@
 ////////////////////////////// 出力・描画 ///////////////////////////////
-class ButtonManager extends React.Component {
+class RadioButtonManager extends React.Component {
     constructor(props){
         super(props)
+        
         this.state = {
             selectedButtonId: null
         }
@@ -17,17 +18,17 @@ class ButtonManager extends React.Component {
     }
 
     render() {
-        // propsからarrayを受け取る
-        const sizes = this.props.sizes
-        const buttons = sizes.map( size => {
+        const materials = this.props.materials
+        const buttons = materials.map( material => {
             return (
                 <RadioButton
-                    key={size.id}
-                    id={size.id}
-                    label={size.label}
-                    groupName={size.groupName}
-                    value={size.value}
-                    isSelected={this.state.selectedButtonId === size.id}
+                    key={material.id}
+                    id={material.id}
+                    className={this.props.buttonClassName}
+                    label={material.label}
+                    groupName={material.groupName}
+                    value={material.value}
+                    selectedId={this.state.selectedButtonId}
                     onClick={this.handleButtonClick} />
             )
         })
@@ -40,7 +41,7 @@ class ButtonManager extends React.Component {
     }
 }
 
-const RadioButton = ({id, label, groupName, value, isSelected, onClick}) => {
+function RadioButton ({id, label, className, groupName, value, selectedId, onClick}){
     const selectedStyle = {
         backgroundColor: "white",
         color: "orange",
@@ -49,21 +50,21 @@ const RadioButton = ({id, label, groupName, value, isSelected, onClick}) => {
         backgroundColor: "#ccc",
         color: "black",
     }
-    
     return (
         <button
             type="button"
-            className="my-radio-button"
             id={id}
+            className={className}
             name={groupName}
             value={value}
             onClick={onClick}
-            style={isSelected ? selectedStyle : normalStyle}
+            style={selectedId === id ? selectedStyle : normalStyle}
         >
             {label}
         </button>
     )
 }
+
 
 /**
  * Calculatorのステータスを初期化する関数
@@ -94,6 +95,7 @@ class EvCalculator extends React.Component {
         this.handleChange = this.handleChange.bind(this)
         this.selectInput = this.selectInput.bind(this)
         this.handleButtonClick = this.handleButtonClick.bind(this)
+        this.skillButtonClick = this.skillButtonClick.bind(this)
     }
 
     handleChange(event){
@@ -108,6 +110,12 @@ class EvCalculator extends React.Component {
         const target = event.target
         const id = $(target).parents(".calculator").attr("id")
         this.props.onClick(id, target.name, target.value)
+    }
+
+    skillButtonClick(event, value){
+        const target = event.target
+        const id = $(target).parents(".calculator").attr("id")
+        this.props.onClick(id, target.name, value)
     }
 
     selectInput(event){
@@ -131,9 +139,9 @@ class EvCalculator extends React.Component {
             )
         })
 
-        // 斬れ味用のラジオボタン
-        // ラジオボタンに必要な情報を持つobjの配列をつくる
-        const sizes = Object.keys(PHYSICAL_SHARPNESS).map( engColor => {
+        const radioButtonClassName = "radio-button"
+
+        const materials = Object.keys(PHYSICAL_SHARPNESS).map( engColor => {
             return(
                 {
                     id: engColor,
@@ -144,28 +152,29 @@ class EvCalculator extends React.Component {
             )
         })
 
-        const sharpnessRadioButtons = <ButtonManager 
-                                        sizes={sizes}
-                                        onClick={this.handleButtonClick} />
-
+        const sharpnessRadioButtons = <RadioButtonManager 
+                                        materials={materials}
+                                        buttonClassName={radioButtonClassName}
+                                        onClick={this.handleButtonClick}
+                                      />
+        
         const skillButtonRows = Object.keys(SKILLS).map( skillName => {
-            const sizes = Object.keys(SKILLS[skillName]).map( lv => {
-                return (
-                        {
-                            id: lv,
-                            label: lv,
-                            groupName: skillName,
-                            value: lv
-                        }
-                    )
+            const materials = Object.keys(SKILLS[skillName]).map( lv => {
+                return({
+                    id: lv,
+                    label: lv,
+                    groupName: skillName,
+                    value: lv,
+                })
             })
-            return (
+            return(
                 <div className="skill-row" key={skillName} id={skillName}>
                     <label className="skill-label">
                         {SKILL_NAME_ENG_JP[skillName]}
                     </label>
-                    <ButtonManager
-                        sizes={sizes}
+                    <RadioButtonManager
+                        materials={materials}
+                        buttonClassName={radioButtonClassName}
                         onClick={this.handleButtonClick}
                     />
                 </div>

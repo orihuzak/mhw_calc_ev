@@ -133,6 +133,19 @@ p{
     margin: 0;
 }
 
+.radio-button{
+    width: 25px;
+    height: 25px;
+    border-radius: 10%;
+    border: 1px solid #ccc;
+    margin-right: 2px;
+    background-color: darkgray;
+}
+
+.radio-button:hover{
+    opacity: .8;
+}
+
 
 /* ラジオボタンのスタイル */
 .my-radio-button{
@@ -141,6 +154,7 @@ p{
     border-radius: 10%;
     border: 1px solid #ccc;
     margin-right: 2px;
+    
 }
 
 .my-radio-button:hover{
