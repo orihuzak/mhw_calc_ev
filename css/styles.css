@@ -146,17 +146,6 @@ p{
     opacity: .8;
 }
 
-
-/* ラジオボタンのスタイル */
-.my-radio-button{
-    width: 25px;
-    height: 25px;
-    border-radius: 10%;
-    border: 1px solid #ccc;
-    margin-right: 2px;
-    
-}
-
-.my-radio-button:hover{
-    opacity: .8;
+.radio-button:focus{
+    outline: 0;
 }
