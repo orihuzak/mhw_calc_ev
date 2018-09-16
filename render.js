@@ -2,18 +2,11 @@
 class RadioButtonManager extends React.Component {
     constructor(props){
         super(props)
-        
-        this.state = {
-            selectedButtonId: null
-        }
         this.handleButtonClick = this.handleButtonClick.bind(this)
     }
 
     handleButtonClick(event){
         const target = event.target
-        this.setState({
-            selectedButtonId: target.id,
-        })
         this.props.onClick(event)
     }
 
@@ -28,7 +21,7 @@ class RadioButtonManager extends React.Component {
                     label={material.label}
                     groupName={material.groupName}
                     value={material.value}
-                    selectedId={this.state.selectedButtonId}
+                    selectedId={this.props.selectedButtonId}
                     onClick={this.handleButtonClick} />
             )
         })
@@ -82,7 +75,7 @@ function initializeCalculatorStatus(){
     }
     
     // スキル名とレベルを初期化
-    for(let skillName of Object.keys(SKILLS)){
+    for(const skillName of Object.keys(SKILLS)){
         status[skillName] = "0"
     }
 
@@ -95,7 +88,6 @@ class EvCalculator extends React.Component {
         this.handleChange = this.handleChange.bind(this)
         this.selectInput = this.selectInput.bind(this)
         this.handleButtonClick = this.handleButtonClick.bind(this)
-        this.skillButtonClick = this.skillButtonClick.bind(this)
     }
 
     handleChange(event){
@@ -110,12 +102,6 @@ class EvCalculator extends React.Component {
         const target = event.target
         const id = $(target).parents(".calculator").attr("id")
         this.props.onClick(id, target.name, target.value)
-    }
-
-    skillButtonClick(event, value){
-        const target = event.target
-        const id = $(target).parents(".calculator").attr("id")
-        this.props.onClick(id, target.name, value)
     }
 
     selectInput(event){
@@ -155,6 +141,7 @@ class EvCalculator extends React.Component {
         const sharpnessRadioButtons = <RadioButtonManager 
                                         materials={materials}
                                         buttonClassName={radioButtonClassName}
+                                        selectedButtonId={status.physicalSharpness}
                                         onClick={this.handleButtonClick}
                                       />
         
@@ -175,6 +162,7 @@ class EvCalculator extends React.Component {
                     <RadioButtonManager
                         materials={materials}
                         buttonClassName={radioButtonClassName}
+                        selectedButtonId={status[skillName]}
                         onClick={this.handleButtonClick}
                     />
                 </div>
@@ -265,7 +253,6 @@ class CalculatorManager extends React.Component {
     resetCalculator(event){
         const id = event.target.id
         const calculators = {...this.state.calculators}
-        // リセット関数とかを設置する
         calculators[id] = initializeCalculatorStatus()
         this.setState({ calculators })
     }

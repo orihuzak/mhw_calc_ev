@@ -10,9 +10,6 @@ class RadioButtonManager extends React.Component {
 
     handleButtonClick(event){
         const target = event.target
-        this.setState({
-            selectedButtonId: target.id,
-        })
     }
 
     render() {
@@ -26,7 +23,7 @@ class RadioButtonManager extends React.Component {
                     label={material.label}
                     groupName={material.groupName}
                     value={material.value}
-                    selectedId={this.state.selectedButtonId}
+                    selectedId={this.props.selectedButtonId}
                     onClick={this.handleButtonClick} />
             )
         })
