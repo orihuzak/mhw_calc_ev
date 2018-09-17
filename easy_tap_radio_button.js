@@ -1,15 +1,12 @@
 class RadioButtonManager extends React.Component {
     constructor(props){
         super(props)
-        
-        this.state = {
-            selectedButtonId: null
-        }
         this.handleButtonClick = this.handleButtonClick.bind(this)
     }
 
     handleButtonClick(event){
         const target = event.target
+        this.props.onClick(event)
     }
 
     render() {

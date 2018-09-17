@@ -59,28 +59,7 @@ function RadioButton ({id, label, className, groupName, value, selectedId, onCli
 }
 
 
-/**
- * Calculatorのステータスを初期化する関数
- * 武器のステータスとスキルレベルを全て0で初期化します
- * @return {object} status calculatorが使用するステータスobjectです
- */
-function initializeCalculatorStatus(){
-    let status = {
-        attack: 0,
-        affinity: 0,
-        physicalSharpness: "green",
-        resultAttack: 0,
-        resultAffinity: 0,
-        resultEv: 0,
-    }
-    
-    // スキル名とレベルを初期化
-    for(const skillName of Object.keys(SKILLS)){
-        status[skillName] = "0"
-    }
 
-    return status
-}
 
 class EvCalculator extends React.Component {
     constructor(props){
@@ -211,92 +190,128 @@ class CalculatorManager extends React.Component {
         this.addCalculator = this.addCalculator.bind(this)
         this.removeCalculator = this.removeCalculator.bind(this)
         this.resetCalculator = this.resetCalculator.bind(this)
+        this._findCalculatorIndex = this._findCalculatorIndex.bind(this)
+        this._initCalculatorStatus = this._initCalculatorStatus.bind(this)
         this.state = {
-            calculators:{
-                [uuid4()]: initializeCalculatorStatus(),
-            }
+            calculators:[{
+                id: uuid4(),
+                status: this._initCalculatorStatus(),
+            }]
         }
     }
 
-    handleChange(key, statusName, statusValue){
-        let calculators = {...this.state.calculators}
-        let calculator = {...calculators[key]}
-        calculator[statusName] = statusValue
-        // 計算して計算結果を反映
-        const result = calcExpectedValue(calculator)
-        calculator.resultAttack = result.attack
-        calculator.resultAffinity = result.affinity
-        calculator.resultEv = result.ev
-        calculators[key] = calculator
+    _initCalculatorStatus(){
+        let status = {
+            attack: 0,
+            affinity: 0,
+            physicalSharpness: "green",
+            resultAttack: 0,
+            resultAffinity: 0,
+            resultEv: 0,
+        }
+        
+        // スキル名とレベルを初期化
+        for(const skillName of Object.keys(SKILLS)){
+            status[skillName] = "0"
+        }
+
+        return status
+    }
+
+    _findCalculatorIndex(id){
+        let index = null
+        for(const calculator of this.state.calculators){
+            if(id === calculator.id){ 
+                index = this.state.calculators.indexOf(calculator)
+            }
+        }
+        return index
+    }
+
+    handleChange(id, statusName, statusValue){
+        let calculators = [...this.state.calculators]
+        const index = this._findCalculatorIndex(id)
+        let calculator = {...calculators[index]}
+        let status = {...calculator.status}
+        status[statusName] = statusValue
+        const result = calcExpectedValue(status)
+        status.resultAttack = result.attack
+        status.resultAffinity = result.affinity
+        status.resultEv = result.ev
+        calculator.status = status
+        calculators[index] = calculator
         this.setState({ calculators })
     }
 
     addCalculator(event){
-        const copiedStatus = this.state.calculators[event.target.id]
+        const target = event.target
+        const id = $(target).parents(".calculator").attr("id")
+        const index = this._findCalculatorIndex(id)
+        const copiedStatus = this.state.calculators[index].status
         const newId = uuid4()
-        const calculators = {...this.state.calculators}
-        calculators[newId] = copiedStatus
+        const calculators = [...this.state.calculators]
+        calculators.splice(index, 0, {id: newId, status: copiedStatus})
         this.setState({ calculators })
     }
 
     removeCalculator(event){
         // 現在のcalculatorの数が1なら削除しない
-        if(Object.keys(this.state.calculators).length == 1){
+        if(this.state.calculators.length == 1){
             alert("残り１コなんで削除できません。")
             return
         }
-        const calculators = {...this.state.calculators}
-        delete calculators[event.target.id]
+        const id = $(event.target).parents(".calculator").attr("id")
+        const calculators = [...this.state.calculators]
+        const index = this._findCalculatorIndex(id)
+        calculators.splice(index, 1)
         this.setState({ calculators })
     }
 
     resetCalculator(event){
-        const id = event.target.id
-        const calculators = {...this.state.calculators}
-        calculators[id] = initializeCalculatorStatus()
+        const id = $(event.target).parents(".calculator").attr("id")
+        const index = this._findCalculatorIndex(id)
+        const calculators = [...this.state.calculators]
+        const calculator = {...calculators[index]}
+        let status = {...calculator.status}
+        status = this._initCalculatorStatus()
+        calculator.status = status
+        calculators[index] = calculator
         this.setState({ calculators })
     }
 
     render(){
-        // stateの情報をもとにliを作成
-        const apps = []
         const calculators = this.state.calculators
-        for(const [key, status] of Object.entries(calculators)){
-            apps.push(
-                <li key={key} id={key} className="calculator">
+        const app = calculators.map(({ id, status }) => {
+            return (
+                <li key={id} id={id} className="calculator">
                     <div className="app-header">
                         <button
                             type="button"
-                            id={key}
                             className="reset-button"
                             onClick={this.resetCalculator}>
                             &#x21BB;
                         </button>
                         <button
                             type="button"
-                            id={key}
                             className="new-button"
                             onClick={this.addCalculator}>
                             ＋
                         </button>
                         <button 
                             type="button"
-                            id={key}
                             className="close-button"
                             onClick={this.removeCalculator}>
                             ×
                         </button>
                     </div>
                     <EvCalculator
-                        key={key}
-                        id={key}
                         status={status}
                         onChange={this.handleChange}
                         onClick={this.handleChange}/>
                 </li>
             )
-        }
-        return (<ul>{apps}</ul>)
+        })
+        return (<ul>{app}</ul>)
     }
 }
 
